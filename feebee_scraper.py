@@ -16,19 +16,19 @@ def scrape_iphone15_price():
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
 
-        items = soup.select("li.BaseGridItem__grid___2wuJ7")  # 商品區塊
+        items = soup.select("li[data-qa-locator='product-item']")  # 更新選擇器
         if not items:
             return "❌ 找不到商品資訊"
 
         results = []
         for item in items[:5]:
-            name_tag = item.select_one("span.BaseGridItem__title___2HWui")
-            price_tag = item.select_one("em.BaseGridItem__price___31jkj")
+            name_tag = item.select_one("span.sc-6n68ef-0")  # 商品名稱
+            price_tag = item.select_one("span.sc-1e4emg8-1")  # 價格文字
 
             if name_tag and price_tag:
                 name = name_tag.get_text(strip=True)
                 price = price_tag.get_text(strip=True)
-                results.append(f"{name} - ${price}")
+                results.append(f"{name} - {price}")
 
         return "\n".join(results) if results else "❌ 商品清單為空"
 
