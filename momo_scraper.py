@@ -1,34 +1,35 @@
 import requests
+from bs4 import BeautifulSoup
+import urllib.parse
 
 def scrape_iphone15_price():
-    url = "https://m.momoshop.com.tw/api/momoSearch.jsp"
-    params = {
-        "searchKeyword": "iphone 15",
-        "curPage": "1",
-        "pageSize": "20"
-    }
+    query = "iphone 15"
+    encoded_query = urllib.parse.quote(query)
+    url = f"http://m.momoshop.com.tw/mosearch/{encoded_query}.html"
     headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Content-Type": "application/json"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
     try:
-        res = requests.get(url, params=params, headers=headers)
+        res = requests.get(url, headers=headers)
         res.raise_for_status()
-        data = res.json()
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        goods = data.get("rtnSearchData", {}).get("goodsInfoList", [])
-        if not goods:
-            return "❌ momo 查不到商品資料"
+        items = soup.select("ul.prdList li")
+        if not items:
+            return "❌ 找不到商品資訊"
 
         results = []
-        for item in goods[:5]:  # 只取前 5 筆商品
-            name = item.get("goodsName")
-            price = item.get("price")
-            if name and price:
+        for item in items[:5]:  # 只取前 5 筆商品
+            name_tag = item.select_one("p.prdName")
+            price_tag = item.select_one("b.price")
+
+            if name_tag and price_tag:
+                name = name_tag.get_text(strip=True)
+                price = price_tag.get_text(strip=True)
                 results.append(f"{name} - ${price}")
 
         return "\n".join(results)
 
     except Exception as e:
-        return f"⚠️ momo API 錯誤：{e}"
+        return f"⚠️ 爬蟲錯誤：{e}"
