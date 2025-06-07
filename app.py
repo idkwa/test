@@ -1,20 +1,20 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from feebee_scraper import scrape_iphone15_price
 import requests
-
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1379337992317042688/aqp4lMDPPgrRFfxuYqhQSMiDKCht7-oP8hdCIRuDxNpJaJL90HwPzVFgFLsqtYlRrJcO"
+import os
 
 app = Flask(__name__)
 
-def send_to_discord(message):
-    data = {"content": message}
-    response = requests.post(DISCORD_WEBHOOK_URL, json=data)
-    if response.status_code != 204:
-        print("傳送失敗", response.text)
+DISCORD_WEBHOOK_URL = os.environ.get("https://discordapp.com/api/webhooks/1379337992317042688/aqp4lMDPPgrRFfxuYqhQSMiDKCht7-oP8hdCIRuDxNpJaJL90HwPzVFgFLsqtYlRrJcO")
 
 @app.route("/webhook", methods=["POST"])
-def trigger_scraper():
-    price_info = scrape_iphone15_price()
-    send_to_discord(f"📱 iPhone 15 價格更新：\n{price_info}")
-    return jsonify({"status": "ok", "message": "已送出 Discord"})
+def webhook():
+    content = scrape_iphone15_price()
+    payload = {
+        "content": f"📱 iPhone 15 價格更新：\n{content}"
+    }
+    requests.post(DISCORD_WEBHOOK_URL, json=payload)
+    return {"status": "success"}
 
+if __name__ == "__main__":
+    app.run()
