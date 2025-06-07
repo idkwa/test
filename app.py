@@ -9,7 +9,7 @@ DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    content = scrape_iphone15_price()
+    content = scrape_ptt_ios_titles()
     payload = {
         "content": f"📱 iPhone 15 價格更新：\n{content}"
     }
