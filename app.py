@@ -1,5 +1,5 @@
 from flask import Flask, request
-from feebee_scraper import scrape_iphone15_price
+from feebee_scraper import scrape_ptt_ios_titles
 import requests
 import os
 
