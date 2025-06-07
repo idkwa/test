@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import json
+import re
 
 def scrape_iphone15_price():
     url = "https://www.momoshop.com.tw/search/searchShop.jsp?keyword=iphone%2015"
@@ -12,23 +14,29 @@ def scrape_iphone15_price():
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # 更新的商品區塊選擇器
-        items = soup.select('li.goodsItem')
-        if not items:
-            return "❌ 找不到商品資訊（無商品區塊）"
+        # momo 商品資料藏在 <script> 內的 JSON 中
+        script_tag = soup.find("script", string=re.compile("var searchData ="))
+        if not script_tag:
+            return "❌ 找不到商品資料 script 區塊"
+
+        # 擷取 JSON 字串
+        match = re.search(r"var searchData = ({.*?});", script_tag.string)
+        if not match:
+            return "❌ 無法擷取 JSON 內容"
+
+        data = json.loads(match.group(1))
+        goods = data.get("goodsInfoList", [])
+        if not goods:
+            return "❌ 找不到商品資訊"
 
         results = []
-
-        for item in items[:5]:  # 限制前 5 筆商品
-            name_tag = item.select_one("h3.prdName")
-            price_tag = item.select_one("b.price")
-
-            if name_tag and price_tag:
-                name = name_tag.get_text(strip=True)
-                price = price_tag.get_text(strip=True)
+        for item in goods[:5]:
+            name = item.get("goodsName")
+            price = item.get("price")
+            if name and price:
                 results.append(f"{name} - ${price}")
 
-        return "\n".join(results) if results else "❌ 找不到商品資訊（商品資料不完整）"
+        return "\n".join(results)
 
     except Exception as e:
         return f"⚠️ 爬蟲錯誤：{e}"
