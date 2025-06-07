@@ -5,7 +5,7 @@ import urllib.parse
 def scrape_iphone15_price():
     query = "iphone 15"
     encoded_query = urllib.parse.quote_plus(query)
-    url = f"https://feebee.com.tw/s/?q={encoded_query}"
+    url = f"https://feebee.com.tw/s/?q=iphone+15&p=%7Bencoded_query%7D"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
