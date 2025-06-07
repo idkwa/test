@@ -36,4 +36,5 @@ def scrape_iphone15_price():
 
     except Exception as e:
         return f"⚠️ 爬蟲錯誤：{e}"
+print(res.text[:500])
 
