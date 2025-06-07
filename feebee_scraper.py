@@ -1,41 +1,35 @@
 import requests
-from bs4 import BeautifulSoup
 import urllib.parse
-import time
-import random
 
 def scrape_iphone15_price():
     query = "iphone 15"
-    encoded_query = urllib.parse.quote_plus(query)
-    url = f"https://feebee.com.tw/s/?q={encoded_query}"
+    encoded_query = urllib.parse.quote(query)
+    
+    url = f"https://shopee.tw/api/v4/search/search_items?keyword={encoded_query}&limit=5&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0",
+        "Referer": f"https://shopee.tw/search?keyword={encoded_query}"
     }
 
     try:
         res = requests.get(url, headers=headers)
         res.raise_for_status()
-        soup = BeautifulSoup(res.text, "html.parser")
+        data = res.json()
 
-        items = soup.select("li.productItem")
+        items = data.get("items", [])
         if not items:
             return "❌ 找不到商品資訊"
 
         results = []
         for item in items[:5]:
-            name_tag = item.select_one(".productItem__title")
-            price_tag = item.select_one(".productItem__price--highlight")
+            item_basic = item.get("item_basic", {})
+            name = item_basic.get("name", "未知商品")
+            price = item_basic.get("price", 0) // 100000  # 價格是乘以 100000 的
+            results.append(f"{name} - ${price}")
 
-            if name_tag and price_tag:
-                name = name_tag.get_text(strip=True)
-                price = price_tag.get_text(strip=True)
-                results.append(f"{name} - {price}")
-
-            # 加入隨機延遲，避免觸發反爬蟲機制
-            time.sleep(random.uniform(1, 3))
-
-        return "\n".join(results) if results else "❌ 商品清單為空"
+        return "\n".join(results)
 
     except Exception as e:
-        return f"⚠️ 爬蟲錯誤：{e}"
+        return f"⚠️ 蝦皮爬蟲錯誤：{e}"
+
