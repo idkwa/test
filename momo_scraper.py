@@ -7,7 +7,7 @@ import urllib.parse
 def scrape_iphone15_price():
     query = "iphone 15"
     encoded_query = urllib.parse.quote(query)
-    url = f"https://www.momoshop.com.tw/search/searchShop.jsp?keyword={encoded_query}&searchType=1"
+    url = f"https://www.momoshop.com.tw/search/searchShop.jsp?keyword=iphone%2015&_isFuzzy=0&searchType=1"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
