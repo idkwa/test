@@ -1,36 +1,26 @@
 import requests
+from bs4 import BeautifulSoup
 
-def scrape_iphone15_price():
-    url = "https://tw.buy.yahoo.com/api/v1/display/search"
-    params = {
-        "p": "iphone 15",
-        "fl": "tw",
-        "device": "desktop"
-    }
+def scrape_ptt_ios_titles():
+    url = "https://www.ptt.cc/bbs/iOS/index.html"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0"
     }
 
     try:
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers)
         res.raise_for_status()
-        data = res.json()
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        items = []
-        for section in data.get("sections", []):
-            items.extend(section.get("items", []))
-
-        if not items:
-            return "❌ 找不到商品資訊"
+        titles = soup.select("div.title a")
+        if not titles:
+            return "❌ 找不到文章標題"
 
         results = []
-        for item in items[:5]:  # 前 5 筆商品
-            name = item.get("name")
-            price = item.get("price", {}).get("value") or item.get("price")
-            if name and price:
-                results.append(f"{name} - ${price}")
+        for title in titles[:5]:  # 取前 5 篇
+            results.append(title.get_text(strip=True))
 
-        return "\n".join(results) if results else "❌ 商品清單為空"
+        return "\n".join(results)
 
     except Exception as e:
-        return f"⚠️ Yahoo API 錯誤：{e}"
+        return f"⚠️ 爬蟲錯誤：{e}"
