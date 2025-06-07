@@ -16,6 +16,7 @@ def scrape_iphone15_price():
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
 
+        # 更新 CSS 選擇器
         items = soup.select("li.productItem")
         if not items:
             return "❌ 找不到商品資訊"
