@@ -1,40 +1,35 @@
 import requests
+from bs4 import BeautifulSoup
 
 def scrape_iphone15_price():
+    url = "https://www.momoshop.com.tw/search/searchShop.jsp?keyword=iphone%2015"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
     try:
-        url = "https://www.momoshop.com.tw/api/v1/search"
-        params = {
-            "searchType": 1,
-            "keyword": "iphone 15",
-            "curPage": 1,
-            "pageSize": 5
-        }
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept": "application/json, text/plain, */*",
-            "Referer": "https://www.momoshop.com.tw/",
-            "X-Requested-With": "XMLHttpRequest"
-        }
+        res = requests.get(url, headers=headers)
+        res.raise_for_status()
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        res = requests.get(url, params=params, headers=headers)
-        res.raise_for_status()  # 非 200 則拋出錯誤
+        # 新的商品區塊選擇器
+        items = soup.select('li.goodsItem')
+        if not items:
+            return "❌ 找不到商品資訊（無商品區塊）"
 
-        try:
-            data = res.json()
-        except Exception:
-            print("⚠️ 非 JSON 回傳內容：")
-            print(res.text[:500])  # 印出前 500 字協助 debug
-            return "❌ momo 回傳非 JSON 格式，可能被擋了"
+        results = []
 
-        goods = data.get("rtnSearchResult", {}).get("goodsInfoList", [])
+        for item in items[:5]:  # 限制前 5 筆商品
+            name_tag = item.select_one("h3.prdName")
+            price_tag = item.select_one("b.price")
 
-        if not goods:
-            return "找不到商品資訊（API 回傳空資料）"
+            if name_tag and price_tag:
+                name = name_tag.get_text(strip=True)
+                price = price_tag.get_text(strip=True)
+                results.append(f"{name} - ${price}")
 
-        results = [f"{item['goodsName']} - ${item['price']}" for item in goods]
-        return "\n".join(results)
+        return "\n".join(results) if results else "❌ 找不到商品資訊（商品資料不完整）"
 
     except Exception as e:
         return f"⚠️ 爬蟲錯誤：{e}"
-print(res.text[:500])
 
