@@ -12,7 +12,7 @@ def scrape_iphone15_price():
         res.raise_for_status()
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # 新的商品區塊選擇器
+        # 更新的商品區塊選擇器
         items = soup.select('li.goodsItem')
         if not items:
             return "❌ 找不到商品資訊（無商品區塊）"
@@ -32,4 +32,3 @@ def scrape_iphone15_price():
 
     except Exception as e:
         return f"⚠️ 爬蟲錯誤：{e}"
-
