@@ -36,7 +36,7 @@ Original file is located at
 #
 
 from flask import Flask, request, jsonify
-from momo_scraper import scrape_iphone15_price
+from feebee_scraper import scrape_iphone15_price
 import requests
 
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1379337992317042688/aqp4lMDPPgrRFfxuYqhQSMiDKCht7-oP8hdCIRuDxNpJaJL90HwPzVFgFLsqtYlRrJcO"
